@@ -17,6 +17,9 @@ The Sheet Music Library API is a RESTful web service built with Spring Boot. It 
 - **Read-Only Instrument Data**: Access information about musical instruments in a read-only format.
 - **Webhook Notifications**: Subscribe to notifications for new sheet music written by specific composers.
 
+## Demo video
+[Sheet Music Library API](/src/main/resources/RestApi-Sheet%20Music%20Library.mp4)
+
 ## Getting Started
 ### Prerequisites
 
