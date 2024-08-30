@@ -1,0 +1,3755 @@
+{
+	"info": {
+		"_postman_id": "3c7588c2-321b-46e4-9415-87a5f23659ee",
+		"name": "REST API - Sheet Music Library",
+		"description": "# 🚀 Get started here\n\nThis template guides you through CRUD operations (GET, POST, PUT, DELETE), variables, and tests.\n\n## 🔖 **How to use this template**\n\n#### **Step 1: Send requests**\n\nRESTful APIs allow you to perform CRUD operations using the POST, GET, PUT, and DELETE HTTP methods.\n\nThis collection contains each of these [request](https://learning.postman.com/docs/sending-requests/requests/) types. Open each request and click \"Send\" to see what happens.\n\n#### **Step 2: View responses**\n\nObserve the response tab for status code (200 OK), response time, and size.\n\n#### **Step 3: Send new Body data**\n\nUpdate or add new data in \"Body\" in the POST request. Typically, Body data is also used in PUT request.\n\n```\n{\n    \"name\": \"Add your name in the body\"\n}\n\n ```\n\n#### **Step 4: Update the variable**\n\nVariables enable you to store and reuse values in Postman. We have created a [variable](https://learning.postman.com/docs/sending-requests/variables/) called `base_url` with the sample request [https://postman-api-learner.glitch.me](https://postman-api-learner.glitch.me). Replace it with your API endpoint to customize this collection.\n\n#### **Step 5: Add tests in the \"Tests\" tab**\n\nTests help you confirm that your API is working as expected. You can write test scripts in JavaScript and view the output in the \"Test Results\" tab.\n\n<img src=\"https://content.pstmn.io/b5f280a7-4b09-48ec-857f-0a7ed99d7ef8/U2NyZWVuc2hvdCAyMDIzLTAzLTI3IGF0IDkuNDcuMjggUE0ucG5n\">\n\n## 💪 Pro tips\n\n- Use folders to group related requests and organize the collection.\n- Add more [scripts](https://learning.postman.com/docs/writing-scripts/intro-to-scripts/) in \"Tests\" to verify if the API works as expected and execute workflows.\n    \n\n## 💡Related templates\n\n[API testing basics](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=e9a37a28-055b-49cd-8c7e-97494a21eb54&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)  \n[API documentation](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=e9c28f47-1253-44af-a2f3-20dce4da1f18&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)  \n[Authorization methods](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=31a9a6ed-4cdf-4ced-984c-d12c9aec1c27&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "24635144"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Generate a unique email\r",
+									"const uniqueSuffix = new Date().getTime();\r",
+									"const email = `user${uniqueSuffix}@mail.com`;\r",
+									"\r",
+									"// Save it to an environment or collection variable\r",
+									"pm.collectionVariables.set('email', email);\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {\r",
+									"  pm.expect(pm.response.code).to.equal(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Content-Type header is application/hal+json\", function () {\r",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/hal+json\");\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Presence of message and _links in the response\", function () {\r",
+									"  const responseData = pm.response.json();\r",
+									"  \r",
+									"  pm.expect(responseData).to.be.an('object');\r",
+									"  pm.expect(responseData.message).to.exist;\r",
+									"  pm.expect(responseData._links).to.exist;\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Validate the structure and data types of the _links object\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseData).to.be.an('object');\r",
+									"    pm.expect(responseData._links).to.be.an('object');\r",
+									"    pm.expect(responseData._links.login).to.be.an('object');\r",
+									"    pm.expect(responseData._links.login.href).to.be.a('string');\r",
+									"    pm.expect(responseData._links.login.type).to.be.a('string');\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"firstName\": \"exampleFirstName\",\r\n    \"lastName\": \"exampleLastName\",\r\n    \"email\": \"{{email}}\",\r\n    \"password\": \"examplePassword\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonResponse = pm.response.json();\r",
+									"pm.collectionVariables.set('authToken', jsonResponse.token);\r",
+									"\r",
+									"pm.test(\"Response body structure is valid\", function () {\r",
+									"    pm.expect(jsonResponse).has.property('token');\r",
+									"});\r",
+									"\r",
+									"// Add a test to check for the response status code\r",
+									"pm.test(\"Response status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"{{email}}\",\r\n    \"password\": \"examplePassword\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Sheet music",
+			"item": [
+				{
+					"name": "List all sheet music",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 500ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response content type is application/json\", function () {\r",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Id and title fields should have valid format\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    \r",
+									"    pm.expect(responseData).to.be.an('array');\r",
+									"    responseData.forEach(function(item) {\r",
+									"        pm.expect(item.id).to.be.a('number');\r",
+									"        pm.expect(item.title).to.be.a('string');\r",
+									"    });\r",
+									"});\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/sheet-music",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"sheet-music"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get one sheet music",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response contains valid sheet music data\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    const responseId = jsonData.id;\r",
+									"    const expectedId = pm.variables.get('sheetMusicId');\r",
+									"\r",
+									"    console.log(\"Response ID (value and type):\", responseId, typeof responseId);\r",
+									"    console.log(\"Expected ID (value and type):\", expectedId, typeof expectedId);\r",
+									"\r",
+									"    // Check if they are equal as strings\r",
+									"    pm.expect(responseId.toString()).to.equal(expectedId.toString());\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Define the request URL to retrieve a list of sheet music records\r",
+									"const requestUrl = pm.collectionVariables.get(\"base_url\") + \"/sheet-music\";\r",
+									"\r",
+									"// Send a request to get the list of records\r",
+									"pm.sendRequest(requestUrl, function (err, res) {\r",
+									"    if (err) {\r",
+									"        console.error(\"Error fetching sheet music list:\", err);\r",
+									"        return;\r",
+									"    }\r",
+									"    \r",
+									"    // Check if the response status is OK\r",
+									"    if (res.status === \"OK\") {\r",
+									"        const responseBody = res.json();\r",
+									"        // Ensure response is an array and has at least one record\r",
+									"        if (Array.isArray(responseBody) && responseBody.length > 0) {\r",
+									"            // Get the ID of the first record (you can adjust this logic)\r",
+									"            const validId = responseBody[0].id;\r",
+									"            \r",
+									"        \r",
+									"            pm.collectionVariables.set(\"sheetMusicId\", validId);\r",
+									"            \r",
+									"            // Log the ID to the console for verification\r",
+									"            console.log(\"Valid sheet music ID:\", validId);\r",
+									"        } else {\r",
+									"            console.error(\"No records found in the response.\");\r",
+									"        }\r",
+									"    } else {\r",
+									"        console.error(\"Failed to fetch records. Status code:\", res.status);\r",
+									"    }\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/sheet-music/:sheetMusicId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"sheet-music",
+								":sheetMusicId"
+							],
+							"variable": [
+								{
+									"key": "sheetMusicId",
+									"value": "{{sheetMusicId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add sheet music",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Response is a valid JSON\", function () {",
+									"    pm.response.to.be.json;",
+									"});",
+									"",
+									"pm.test(\"Response contains correct sheet music data\", function () {",
+									"    const jsonData = pm.response.json();",
+									"",
+									"    pm.expect(jsonData.title).to.equal(pm.variables.get(\"sheetMusicTitle\"));",
+									"    pm.expect(jsonData.fileLink).to.equal(\"https://imslp.org/wiki/Violin_Sonata_No.1%2C_Op.13_(Faur%C3%A9%2C_Gabriel)\");",
+									"    pm.expect(jsonData.composer.name).to.equal(\"Gabriel Fauré\");",
+									"    pm.expect(jsonData.composer.era).to.equal(\"Romantic\");",
+									"    pm.expect(jsonData.instrument.name).to.equal(\"Violin\");",
+									"    pm.expect(jsonData.instrument.family).to.equal(\"String\");",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Generate a unique name\r",
+									"const uniqueSuffix = new Date().getTime();\r",
+									"const sheetMusicTitle = `Violin Sonata No.1, Op.${uniqueSuffix}`;\r",
+									"\r",
+									"// Save it to an environment or collection variable\r",
+									"pm.collectionVariables.set('sheetMusicTitle', sheetMusicTitle);\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"{{sheetMusicTitle}}\",\n  \"fileLink\": \"https://imslp.org/wiki/Violin_Sonata_No.1%2C_Op.13_(Faur%C3%A9%2C_Gabriel)\",\n  \"fileType\": \"LINK\",\n  \"composer\": {\n    \"name\": \"Gabriel Fauré\",\n    \"era\": \"Romantic\"\n  },\n  \"instrument\": {\n    \"name\": \"Violin\",\n    \"family\": \"String\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/sheet-music",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"sheet-music"
+							]
+						},
+						"description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nA successful POST request typically returns a `200 OK` or `201 Created` response code."
+					},
+					"response": []
+				},
+				{
+					"name": "Update one sheet music",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has all necessary fields\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property(\"title\");",
+									"});",
+									"",
+									"pm.test(\"Title is updated correctly\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.title).to.equal(pm.variables.get(\"sheetMusicTitle\"));",
+									"});",
+									"",
+									"pm.test(\"Correct resource is updated\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    const responseId = jsonData.id;",
+									"    const expectedId = pm.variables.get('sheetMusicId');",
+									"",
+									"    console.log(\"Response ID (value and type):\", responseId, typeof responseId);",
+									"    console.log(\"Expected ID (value and type):\", expectedId, typeof expectedId);",
+									"",
+									"    // Check if they are equal as strings",
+									"    pm.expect(responseId.toString()).to.equal(expectedId.toString());",
+									"});",
+									"",
+									"pm.test(\"Title is not empty\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.title).to.not.be.empty;",
+									"});",
+									"",
+									"",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Generate a unique name\r",
+									"const uniqueSuffix = new Date().getTime();\r",
+									"const sheetMusicTitle = `Violin Sonata No.1, Op.${uniqueSuffix}`;\r",
+									"\r",
+									"// Save it to an environment or collection variable\r",
+									"pm.collectionVariables.set('sheetMusicTitle', sheetMusicTitle);\r",
+									"\r",
+									"// Define the request URL to retrieve a list of sheet music records\r",
+									"const requestUrl = pm.collectionVariables.get(\"base_url\") + \"/sheet-music\";\r",
+									"\r",
+									"// Send a request to get the list of records\r",
+									"pm.sendRequest(requestUrl, function (err, res) {\r",
+									"    if (err) {\r",
+									"        console.error(\"Error fetching sheet music list:\", err);\r",
+									"        return;\r",
+									"    }\r",
+									"    \r",
+									"    // Check if the response status is OK\r",
+									"    if (res.status === \"OK\") {\r",
+									"        const responseBody = res.json();\r",
+									"        // Ensure response is an array and has at least one record\r",
+									"        if (Array.isArray(responseBody) && responseBody.length > 0) {\r",
+									"            // Get the ID of the first record (you can adjust this logic)\r",
+									"            const validId = responseBody[0].id;\r",
+									"            \r",
+									"        \r",
+									"            pm.collectionVariables.set(\"sheetMusicId\", validId);\r",
+									"            \r",
+									"            // Log the ID to the console for verification\r",
+									"            console.log(\"Valid sheet music ID:\", validId);\r",
+									"        } else {\r",
+									"            console.error(\"No records found in the response.\");\r",
+									"        }\r",
+									"    } else {\r",
+									"        console.error(\"Failed to fetch records. Status code:\", res.status);\r",
+									"    }\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"title\": \"{{sheetMusicTitle}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/sheet-music/:sheetMusicId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"sheet-music",
+								":sheetMusicId"
+							],
+							"variable": [
+								{
+									"key": "sheetMusicId",
+									"value": "{{sheetMusicId}}"
+								}
+							]
+						},
+						"description": "This is a PUT request and it is used to overwrite an existing piece of data. For instance, after you create an entity with a POST request, you may want to modify that later. You can do that using a PUT request. You typically identify the entity being updated by including an identifier in the URL (eg. `id=1`).\n\nA successful PUT request typically returns a `200 OK`, `201 Created`, or `204 No Content` response code."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete sheet music",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Fixed syntax and updated response time test",
+									"pm.test(\"Response status code is 200, 202, or 204\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 202, 204]);",
+									"});",
+									"",
+									"pm.test(\"Response time is within an acceptable range\", function () {",
+									"  pm.expect(pm.response.responseTime).to.be.below(500);",
+									"});",
+									"",
+									"pm.test(\"Verify message for status code 200 or 202\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 202]);",
+									"    pm.expect(pm.response.text()).to.include(\"Sheet music with id \" +  pm.collectionVariables.get(\"sheetMusicId\") + \" has been deleted\");",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Define the request URL to retrieve a list of sheet music records\r",
+									"const requestUrl = pm.collectionVariables.get(\"base_url\") + \"/sheet-music\";\r",
+									"\r",
+									"// Send a request to get the list of records\r",
+									"pm.sendRequest(requestUrl, function (err, res) {\r",
+									"    if (err) {\r",
+									"        console.error(\"Error fetching sheet music list:\", err);\r",
+									"        return;\r",
+									"    }\r",
+									"    \r",
+									"    // Check if the response status is OK\r",
+									"    if (res.status === \"OK\") {\r",
+									"        const responseBody = res.json();\r",
+									"        // Ensure response is an array and has at least one record\r",
+									"        if (Array.isArray(responseBody) && responseBody.length > 0) {\r",
+									"            // Get the ID of the first record (you can adjust this logic)\r",
+									"            const validId = responseBody[0].id;\r",
+									"            \r",
+									"        \r",
+									"            pm.collectionVariables.set(\"sheetMusicId\", validId);\r",
+									"            \r",
+									"            // Log the ID to the console for verification\r",
+									"            console.log(\"Valid sheet music ID:\", validId);\r",
+									"        } else {\r",
+									"            console.error(\"No records found in the response.\");\r",
+									"        }\r",
+									"    } else {\r",
+									"        console.error(\"Failed to fetch records. Status code:\", res.status);\r",
+									"    }\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/sheet-music/:sheetMusicId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"sheet-music",
+								":sheetMusicId"
+							],
+							"variable": [
+								{
+									"key": "sheetMusicId",
+									"value": "{{sheetMusicId}}"
+								}
+							]
+						},
+						"description": "This is a DELETE request, and it is used to delete data that was previously created via a POST request. You typically identify the entity being updated by including an identifier in the URL (eg. `id=1`).\n\nA successful DELETE request typically returns a `200 OK`, `202 Accepted`, or `204 No Content` response code."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Composers",
+			"item": [
+				{
+					"name": "List all composers",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response body contains the required fields for each composer\", function () {\r",
+									"    const composersData = pm.response.json();\r",
+									"\r",
+									"    pm.expect(composersData).to.be.an('array').that.is.not.empty;\r",
+									"\r",
+									"    composersData.forEach(function(composer) {\r",
+									"        pm.expect(composer).to.have.property('name').that.is.a('string');\r",
+									"    });\r",
+									"});\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/composers",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"composers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get one composer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response contains valid composer data\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    const responseId = jsonData.id;\r",
+									"    const expectedId = pm.variables.get('composerId');\r",
+									"\r",
+									"    console.log(\"Response ID (value and type):\", responseId, typeof responseId);\r",
+									"    console.log(\"Expected ID (value and type):\", expectedId, typeof expectedId);\r",
+									"\r",
+									"    // Check if they are equal as strings\r",
+									"    pm.expect(responseId.toString()).to.equal(expectedId.toString());\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Define the request URL to retrieve a list of composers records\r",
+									"const requestUrl = pm.collectionVariables.get(\"base_url\") + \"/composers\";\r",
+									"\r",
+									"// Send a request to get the list of records\r",
+									"pm.sendRequest(requestUrl, function (err, res) {\r",
+									"    if (err) {\r",
+									"        console.error(\"Error fetching composers list:\", err);\r",
+									"        return;\r",
+									"    }\r",
+									"    \r",
+									"    // Check if the response status is OK\r",
+									"    if (res.status === \"OK\") {\r",
+									"        const responseBody = res.json();\r",
+									"        // Ensure response is an array and has at least one record\r",
+									"        if (Array.isArray(responseBody) && responseBody.length > 0) {\r",
+									"            // Get the ID of the first record (you can adjust this logic)\r",
+									"            const validId = responseBody[0].id;\r",
+									"            \r",
+									"        \r",
+									"            pm.collectionVariables.set(\"composerId\", validId);\r",
+									"            \r",
+									"            // Log the ID to the console for verification\r",
+									"            console.log(\"Valid composers ID:\", validId);\r",
+									"        } else {\r",
+									"            console.error(\"No records found in the response.\");\r",
+									"        }\r",
+									"    } else {\r",
+									"        console.error(\"Failed to fetch records. Status code:\", res.status);\r",
+									"    }\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/composers/:composerId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"composers",
+								":composerId"
+							],
+							"variable": [
+								{
+									"key": "composerId",
+									"value": "{{composerId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add composer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Response is a valid JSON\", function () {",
+									"    pm.response.to.be.json;",
+									"});",
+									"",
+									"pm.test(\"Validate the response schema for the expected fields and data types\", function () {",
+									"    const responseData = pm.response.json();",
+									"",
+									"    pm.expect(responseData).to.be.an('object');",
+									"    pm.expect(responseData).to.have.property('id').that.is.a('number');",
+									"    pm.expect(responseData).to.have.property('name').that.is.a('string');",
+									"    pm.expect(responseData).to.have.property('era').that.is.a('string');",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Generate a unique name\r",
+									"const uniqueSuffix = new Date().getTime();\r",
+									"const composerName = `Violin Sonata No.1, Op.${uniqueSuffix}`;\r",
+									"\r",
+									"// Save it to an environment or collection variable\r",
+									"pm.collectionVariables.set('composerName', composerName);\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"{{composerName}}\",\n    \"era\": \"Romantic\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/composers",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"composers"
+							]
+						},
+						"description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nA successful POST request typically returns a `200 OK` or `201 Created` response code."
+					},
+					"response": []
+				},
+				{
+					"name": "Update one sheet music Copy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Content-Type is application/hal+json\", function () {",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/hal+json\");",
+									"});",
+									"",
+									"// Updated schema validation test to check for the existence of id, name, era, and _links properties in the response",
+									"pm.test(\"Verify response schema contains id, name, era, and _links properties\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.be.an('object');",
+									"    pm.expect(responseData.id).to.exist;",
+									"    pm.expect(responseData.name).to.exist;",
+									"    pm.expect(responseData._links).to.exist.and.to.be.an('object');",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Generate a unique name\r",
+									"const uniqueSuffix = new Date().getTime();\r",
+									"const composerName = `Composer ${uniqueSuffix}`;\r",
+									"\r",
+									"// Save it to an environment or collection variable\r",
+									"pm.collectionVariables.set('composerName', composerName);\r",
+									"\r",
+									"// Define the request URL to retrieve a list of composer music records\r",
+									"const requestUrl = pm.collectionVariables.get(\"base_url\") + \"/composers\";\r",
+									"\r",
+									"// Send a request to get the list of records\r",
+									"pm.sendRequest(requestUrl, function (err, res) {\r",
+									"    if (err) {\r",
+									"        console.error(\"Error fetching composer list:\", err);\r",
+									"        return;\r",
+									"    }\r",
+									"    \r",
+									"    // Check if the response status is OK\r",
+									"    if (res.status === \"OK\") {\r",
+									"        const responseBody = res.json();\r",
+									"        // Ensure response is an array and has at least one record\r",
+									"        if (Array.isArray(responseBody) && responseBody.length > 0) {\r",
+									"            // Get the ID of the first record (you can adjust this logic)\r",
+									"            const validId = responseBody[0].id;\r",
+									"            \r",
+									"        \r",
+									"            pm.collectionVariables.set(\"composerId\", validId);\r",
+									"            \r",
+									"            // Log the ID to the console for verification\r",
+									"            console.log(\"Valid composer ID:\", validId);\r",
+									"        } else {\r",
+									"            console.error(\"No records found in the response.\");\r",
+									"        }\r",
+									"    } else {\r",
+									"        console.error(\"Failed to fetch records. Status code:\", res.status);\r",
+									"    }\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"{{composerName}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/composers/:composerId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"composers",
+								":composerId"
+							],
+							"variable": [
+								{
+									"key": "composerId",
+									"value": "{{composerId}}"
+								}
+							]
+						},
+						"description": "This is a PUT request and it is used to overwrite an existing piece of data. For instance, after you create an entity with a POST request, you may want to modify that later. You can do that using a PUT request. You typically identify the entity being updated by including an identifier in the URL (eg. `id=1`).\n\nA successful PUT request typically returns a `200 OK`, `201 Created`, or `204 No Content` response code."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete composer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response time is within acceptable range\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(300);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Content-Type is application/hal+json\", function () {",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/hal+json\");",
+									"});",
+									"",
+									"",
+									"pm.test(\"Message and _links fields exist in the response\", function () {",
+									"  const responseData = pm.response.json();",
+									"  ",
+									"  pm.expect(responseData).to.be.an('object');",
+									"  pm.expect(responseData.message).to.exist;",
+									"  pm.expect(responseData._links).to.exist.and.to.be.an('object');",
+									"});",
+									"",
+									"",
+									"pm.test(\"Message field is a non-empty string\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData.message).to.be.a('string').and.to.have.lengthOf.at.least(0, \"Message should not be empty\");",
+									"});",
+									"",
+									"",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Define the request URL to retrieve a list of composer music records\r",
+									"const requestUrl = pm.collectionVariables.get(\"base_url\") + \"/composers\";\r",
+									"\r",
+									"// Send a request to get the list of records\r",
+									"pm.sendRequest(requestUrl, function (err, res) {\r",
+									"    if (err) {\r",
+									"        console.error(\"Error fetching composer list:\", err);\r",
+									"        return;\r",
+									"    }\r",
+									"    \r",
+									"    // Check if the response status is OK\r",
+									"    if (res.status === \"OK\") {\r",
+									"        const responseBody = res.json();\r",
+									"        // Ensure response is an array and has at least one record\r",
+									"        if (Array.isArray(responseBody) && responseBody.length > 0) {\r",
+									"            // Get the ID of the first record (you can adjust this logic)\r",
+									"            const validId = responseBody[0].id;\r",
+									"            \r",
+									"        \r",
+									"            pm.collectionVariables.set(\"composerId\", validId);\r",
+									"            \r",
+									"            // Log the ID to the console for verification\r",
+									"            console.log(\"Valid composer ID:\", validId);\r",
+									"        } else {\r",
+									"            console.error(\"No records found in the response.\");\r",
+									"        }\r",
+									"    } else {\r",
+									"        console.error(\"Failed to fetch records. Status code:\", res.status);\r",
+									"    }\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/composers/:composerId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"composers",
+								":composerId"
+							],
+							"variable": [
+								{
+									"key": "composerId",
+									"value": "{{composerId}}"
+								}
+							]
+						},
+						"description": "This is a DELETE request, and it is used to delete data that was previously created via a POST request. You typically identify the entity being updated by including an identifier in the URL (eg. `id=1`).\n\nA successful DELETE request typically returns a `200 OK`, `202 Accepted`, or `204 No Content` response code."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Instruments",
+			"item": [
+				{
+					"name": "List all instruments",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Response body contains the required fields for each instrument\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseData).to.be.an('array');\r",
+									"    responseData.forEach(function(instrument) {\r",
+									"        pm.expect(instrument).to.be.an('object');\r",
+									"        pm.expect(instrument).to.have.property('id');\r",
+									"        pm.expect(instrument).to.have.property('name');\r",
+									"        pm.expect(instrument).to.have.property('family');\r",
+									"        pm.expect(instrument).to.have.property('links');\r",
+									"        instrument.links.forEach(function(link) {\r",
+									"            pm.expect(link).to.be.an('object');\r",
+									"            pm.expect(link).to.have.property('rel');\r",
+									"            pm.expect(link).to.have.property('href');\r",
+									"            pm.expect(link).to.have.property('type');\r",
+									"        });\r",
+									"    });\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Content-Type is application/json\", function () {\r",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+									"});\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/instruments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instruments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get one instrument",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response contains valid instrument data\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    const responseId = jsonData.id;\r",
+									"    const expectedId = pm.variables.get('instrumentId');\r",
+									"\r",
+									"    console.log(\"Response ID (value and type):\", responseId, typeof responseId);\r",
+									"    console.log(\"Expected ID (value and type):\", expectedId, typeof expectedId);\r",
+									"\r",
+									"    // Check if they are equal as strings\r",
+									"    pm.expect(responseId.toString()).to.equal(expectedId.toString());\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response has the required fields - id and name\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    \r",
+									"    pm.expect(responseData).to.be.an('object');\r",
+									"    pm.expect(responseData.id).to.exist;\r",
+									"    pm.expect(responseData.name).to.exist;\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"ID is a non-negative integer\", function () {\r",
+									"  const responseData = pm.response.json();\r",
+									"  \r",
+									"  pm.expect(responseData.id).to.be.a('number');\r",
+									"  pm.expect(responseData.id).to.be.at.least(0);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Name is a non-empty string\", function () {\r",
+									"  const responseData = pm.response.json();\r",
+									"  \r",
+									"  pm.expect(responseData).to.be.an('object');\r",
+									"  pm.expect(responseData.name).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Name should not be empty\");\r",
+									"});\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Define the request URL to retrieve a list of instruments records\r",
+									"const requestUrl = pm.collectionVariables.get(\"base_url\") + \"/instruments\";\r",
+									"\r",
+									"// Send a request to get the list of records\r",
+									"pm.sendRequest(requestUrl, function (err, res) {\r",
+									"    if (err) {\r",
+									"        console.error(\"Error fetching instruments list:\", err);\r",
+									"        return;\r",
+									"    }\r",
+									"    \r",
+									"    // Check if the response status is OK\r",
+									"    if (res.status === \"OK\") {\r",
+									"        const responseBody = res.json();\r",
+									"        // Ensure response is an array and has at least one record\r",
+									"        if (Array.isArray(responseBody) && responseBody.length > 0) {\r",
+									"            // Get the ID of the first record (you can adjust this logic)\r",
+									"            const validId = responseBody[0].id;\r",
+									"            \r",
+									"        \r",
+									"            pm.collectionVariables.set(\"instrumentId\", validId);\r",
+									"            \r",
+									"            // Log the ID to the console for verification\r",
+									"            console.log(\"Valid instruments ID:\", validId);\r",
+									"        } else {\r",
+									"            console.error(\"No records found in the response.\");\r",
+									"        }\r",
+									"    } else {\r",
+									"        console.error(\"Failed to fetch records. Status code:\", res.status);\r",
+									"    }\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/instruments/:instrumentId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instruments",
+								":instrumentId"
+							],
+							"variable": [
+								{
+									"key": "instrumentId",
+									"value": "{{instrumentId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Webhooks",
+			"item": [
+				{
+					"name": "Subscribe to new sheet music for a specific instrument",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Define the request URL to retrieve a list of instruments records\r",
+									"const requestUrl = pm.collectionVariables.get(\"base_url\") + \"/instruments\";\r",
+									"let i = pm.collectionVariables.get('i');\r",
+									"// Send a request to get the list of records\r",
+									"pm.sendRequest(requestUrl, function (err, res) {\r",
+									"    if (err) {\r",
+									"        console.error(\"Error fetching instruments list:\", err);\r",
+									"        return;\r",
+									"    }\r",
+									"    \r",
+									"    // Check if the response status is OK\r",
+									"    if (res.status === \"OK\") {\r",
+									"        const responseBody = res.json();\r",
+									"        // Ensure response is an array and has at least one record\r",
+									"        if (Array.isArray(responseBody) && responseBody.length > 0) {\r",
+									"            // Get the ID of the first record (you can adjust this logic)\r",
+									"            if (i >= responseBody.length) {\r",
+									"                i=1;\r",
+									"            }\r",
+									"            const validId = responseBody[i].id;\r",
+									"            i++;\r",
+									"            pm.collectionVariables.set('i', i);\r",
+									"        \r",
+									"            pm.collectionVariables.set(\"instrumentId\", validId);\r",
+									"            \r",
+									"            // Log the ID to the console for verification\r",
+									"            console.log(\"Valid instruments ID:\", validId);\r",
+									"        } else {\r",
+									"            console.error(\"No records found in the response.\");\r",
+									"        }\r",
+									"    } else {\r",
+									"        console.error(\"Failed to fetch records. Status code:\", res.status);\r",
+									"    }\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 201\", function () {\r",
+									"    pm.expect(pm.response.code).to.equal(201);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Response time is within an acceptable range\", function () {\r",
+									"  pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Content-Type header is application/hal+json\", function () {\r",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/hal+json\");\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Response has the required fields\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    \r",
+									"    pm.expect(responseData).to.have.property('id');\r",
+									"    pm.expect(responseData).to.have.property('callbackUrl');\r",
+									"    pm.expect(responseData).to.have.property('instrumentId');\r",
+									"    pm.expect(responseData).to.have.property('_links');\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Validate the structure of the _links object - self, unsubscribe, and all subscriptions\", function () {\r",
+									"  const responseData = pm.response.json();\r",
+									"  \r",
+									"  pm.expect(responseData).to.be.an('object');\r",
+									"  pm.expect(responseData._links).to.exist.and.to.be.an('object');\r",
+									"  pm.expect(responseData._links.self).to.exist.and.to.be.an('object');\r",
+									"  pm.expect(responseData._links.unsubscribe).to.exist.and.to.be.an('object');\r",
+									"  pm.expect(responseData._links['all subscriptions']).to.exist.and.to.be.an('object');\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"callbackUrl\": \"https://webhook-test.com/d543969c8ed26f10c1174be773ef8469\",\r\n  \"instrumentId\": {{instrumentId}}\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/subscriptions/sheet-music",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"subscriptions",
+								"sheet-music"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List all sheet music subscriptions",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {\r",
+									"    pm.expect(pm.response.code).to.equal(200);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Response has the correct Content-Type header of application/json\", function () {\r",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"  pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Response is an array\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    pm.expect(responseData).to.be.an('array');\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Response has the required fields - id, callbackUrl, instrumentId, links\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    \r",
+									"    pm.expect(responseData).to.be.an('array');\r",
+									"    \r",
+									"    responseData.forEach(item => {\r",
+									"        pm.expect(item).to.have.property('id');\r",
+									"        pm.expect(item).to.have.property('callbackUrl');\r",
+									"        pm.expect(item).to.have.property('instrumentId');\r",
+									"        pm.expect(item).to.have.property('links');\r",
+									"    });\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Id is a non-negative integer\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    \r",
+									"    responseData.forEach(function(item) {\r",
+									"        pm.expect(item.id).to.be.a('number');\r",
+									"        pm.expect(item.id).to.be.at.least(0);\r",
+									"    });\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"InstrumentId is a non-negative integer\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    \r",
+									"    responseData.forEach(item => {\r",
+									"        pm.expect(item.instrumentId).to.be.a('number').and.to.be.at.least(0);\r",
+									"    });\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Links is an array with at least one element\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    \r",
+									"    pm.expect(responseData).to.be.an('array');\r",
+									"    pm.expect(responseData[0].links).to.be.an('array').and.to.have.lengthOf.at.least(1);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/subscriptions/sheet-music",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"subscriptions",
+								"sheet-music"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get one sheet music subscription",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is within an acceptable range\", function () {\r",
+									"  pm.expect(pm.response.responseTime).to.be.below(300);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Content-Type header is application/hal+json\", function () {\r",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/hal+json\");\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Response has the required fields - id, callbackUrl, instrumentId\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    \r",
+									"    pm.expect(responseData).to.be.an('object');\r",
+									"    pm.expect(responseData.id).to.exist;\r",
+									"    pm.expect(responseData.callbackUrl).to.exist;\r",
+									"    pm.expect(responseData.instrumentId).to.exist;\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Validate _links object and its properties\", function () {\r",
+									"  const responseData = pm.response.json();\r",
+									"  \r",
+									"  pm.expect(responseData).to.be.an('object');\r",
+									"  pm.expect(responseData._links).to.exist.and.to.be.an('object');\r",
+									"  pm.expect(responseData._links.self).to.exist.and.to.be.an('object');\r",
+									"  pm.expect(responseData._links.unsubscribe).to.exist.and.to.be.an('object');\r",
+									"  pm.expect(responseData._links['all subscriptions']).to.exist.and.to.be.an('object');\r",
+									"});\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Define the request URL to retrieve a list of sheet music subscriptions records\r",
+									"const requestUrl = pm.collectionVariables.get(\"base_url\") + \"/subscriptions/sheet-music\";\r",
+									"\r",
+									"// Send a request to get the list of records\r",
+									"pm.sendRequest(requestUrl, function (err, res) {\r",
+									"    if (err) {\r",
+									"        console.error(\"Error fetching sheet music subscriptions list:\", err);\r",
+									"        return;\r",
+									"    }\r",
+									"    \r",
+									"    // Check if the response status is OK\r",
+									"    if (res.status === \"OK\") {\r",
+									"        const responseBody = res.json();\r",
+									"        // Ensure response is an array and has at least one record\r",
+									"        if (Array.isArray(responseBody) && responseBody.length > 0) {\r",
+									"            // Get the ID of the first record (you can adjust this logic)\r",
+									"            const validId = responseBody[0].id;\r",
+									"            \r",
+									"        \r",
+									"            pm.collectionVariables.set(\"sheetMusicSubscriptionId\", validId);\r",
+									"            \r",
+									"            // Log the ID to the console for verification\r",
+									"            console.log(\"Valid sheet music subscriptions ID:\", validId);\r",
+									"        } else {\r",
+									"            console.error(\"No records found in the response.\");\r",
+									"        }\r",
+									"    } else {\r",
+									"        console.error(\"Failed to fetch records. Status code:\", res.status);\r",
+									"    }\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/subscriptions/sheet-music/:sheetMusicSubscriptionId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"subscriptions",
+								"sheet-music",
+								":sheetMusicSubscriptionId"
+							],
+							"variable": [
+								{
+									"key": "sheetMusicSubscriptionId",
+									"value": "{{sheetMusicSubscriptionId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete sheet music subscription",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"  pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Content-Type header is application/hal+json\", function () {\r",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/hal+json\");\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Response has the required fields - message and _links\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    \r",
+									"    pm.expect(responseData).to.be.an('object');\r",
+									"    pm.expect(responseData.message).to.exist;\r",
+									"    pm.expect(responseData._links).to.exist.and.to.be.an('object');\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Validate the _links object structure and properties\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    \r",
+									"    pm.expect(responseData._links).to.be.an('object');\r",
+									"    pm.expect(responseData._links).to.have.property('all subscriptions').that.is.an('object');\r",
+									"    pm.expect(responseData._links['all subscriptions']).to.have.property('href').that.is.a('string');\r",
+									"    pm.expect(responseData._links['all subscriptions']).to.have.property('type').that.is.a('string');\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Define the request URL to retrieve a list of sheet music subscriptions records\r",
+									"const requestUrl = pm.collectionVariables.get(\"base_url\") + \"/subscriptions/sheet-music\";\r",
+									"\r",
+									"// Send a request to get the list of records\r",
+									"pm.sendRequest(requestUrl, function (err, res) {\r",
+									"    if (err) {\r",
+									"        console.error(\"Error fetching sheet music subscriptions list:\", err);\r",
+									"        return;\r",
+									"    }\r",
+									"    \r",
+									"    // Check if the response status is OK\r",
+									"    if (res.status === \"OK\") {\r",
+									"        const responseBody = res.json();\r",
+									"        // Ensure response is an array and has at least one record\r",
+									"        if (Array.isArray(responseBody) && responseBody.length > 0) {\r",
+									"            // Get the ID of the first record (you can adjust this logic)\r",
+									"            const validId = responseBody[0].id;\r",
+									"            \r",
+									"        \r",
+									"            pm.collectionVariables.set(\"sheetMusicSubscriptionsId\", validId);\r",
+									"            \r",
+									"            // Log the ID to the console for verification\r",
+									"            console.log(\"Valid sheet music subscriptions ID:\", validId);\r",
+									"        } else {\r",
+									"            console.error(\"No records found in the response.\");\r",
+									"        }\r",
+									"    } else {\r",
+									"        console.error(\"Failed to fetch records. Status code:\", res.status);\r",
+									"    }\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/subscriptions/sheet-music/:sheetMusicSubscriptionId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"subscriptions",
+								"sheet-music",
+								":sheetMusicSubscriptionId"
+							],
+							"variable": [
+								{
+									"key": "sheetMusicSubscriptionId",
+									"value": "{{sheetMusicSubscriptionId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Error",
+			"item": [
+				{
+					"name": "Authentication - error",
+					"item": [
+						{
+							"name": "Register - missing mandatory fields",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Generate a unique email\r",
+											"const uniqueSuffix = new Date().getTime();\r",
+											"const email = `user${uniqueSuffix}@mail.com`;\r",
+											"\r",
+											"// Save it to an environment or collection variable\r",
+											"pm.collectionVariables.set('email', email);\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response status code is 400\", function () {\r",
+											"  pm.expect(pm.response.code).to.equal(400);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response time is less than 200ms\", function () {\r",
+											"  pm.expect(pm.response.responseTime).to.be.below(200);\r",
+											"});\r",
+											"\r",
+											"// Test to check for error message\r",
+											"pm.test(\"Error message is present\", function () {\r",
+											"    pm.expect(pm.response.text()).to.include('First name, last name, email and password are mandatory!');\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"lastName\": \"exampleLastName\",\r\n    \"email\": \"{{email}}\",\r\n    \"password\": \"examplePassword\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/auth/register",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"auth",
+										"register"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Register - user already exsist",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Generate a unique email\r",
+											"const uniqueSuffix = new Date().getTime();\r",
+											"const email = `user${uniqueSuffix}@mail.com`;\r",
+											"\r",
+											"// Save it to an environment or collection variable\r",
+											"pm.collectionVariables.set('email', email);\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response status code is 400\", function () {\r",
+											"  pm.expect(pm.response.code).to.equal(400);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response time is less than 200ms\", function () {\r",
+											"  pm.expect(pm.response.responseTime).to.be.below(200);\r",
+											"});\r",
+											"\r",
+											"// Test to check for error message\r",
+											"pm.test(\"Error message is present\", function () {\r",
+											"    pm.expect(pm.response.text()).to.include('User with email ');\r",
+											"    pm.expect(pm.response.text()).to.include(' already exists!');\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"firstName\": \"exampleFirstName\",\r\n    \"lastName\": \"exampleLastName\",\r\n    \"email\": \"admin@admin.com\",\r\n    \"password\": \"examplePassword\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/auth/register",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"auth",
+										"register"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Register - invalid email",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response status code is 400\", function () {\r",
+											"  pm.expect(pm.response.code).to.equal(400);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error message is present\", function () {\r",
+											"    pm.expect(pm.response.text()).to.include('Email should be valid!');\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"firstName\": \"exampleFirstName\",\r\n    \"lastName\": \"exampleLastName\",\r\n    \"email\": \"this is not an email\",\r\n    \"password\": \"examplePassword\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/auth/register",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"auth",
+										"register"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Login invalid email or password",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response status code is 401\", function () {\r",
+											"  pm.expect(pm.response.code).to.equal(401);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error message is present\", function () {\r",
+											"    pm.expect(pm.response.text()).to.include('Invalid email or password!');\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"email\": \"{{email}}\",\r\n    \"password\": \"examplePassword\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/auth/login",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"auth",
+										"login"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Sheet music - error",
+					"item": [
+						{
+							"name": "Get one sheet music - id not found",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response status code is 404\", function () {\r",
+											"  pm.expect(pm.response.code).to.equal(404);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response time is less than 200ms\", function () {\r",
+											"  pm.expect(pm.response.responseTime).to.be.below(200);\r",
+											"});\r",
+											"\r",
+											"// Test to check for error message\r",
+											"pm.test(\"Error message is present\", function () {\r",
+											"    pm.expect(pm.response.text()).to.include('Sheet music not found with id');\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/sheet-music/:sheetMusicId",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"sheet-music",
+										":sheetMusicId"
+									],
+									"variable": [
+										{
+											"key": "sheetMusicId",
+											"value": "84651324"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add sheet music - empty title",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response status code is 400\", function () {",
+											"  pm.expect(pm.response.code).to.equal(400);",
+											"});",
+											"",
+											"pm.test(\"Response time is less than 200ms\", function () {",
+											"  pm.expect(pm.response.responseTime).to.be.below(200);",
+											"});",
+											"",
+											"// Test to check for error message",
+											"pm.test(\"Error message is present\", function () {",
+											"    pm.expect(pm.response.text()).to.include('Title must not be empty.');",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"title\": \"\",\n  \"fileLink\": \"https://imslp.org/wiki/Violin_Sonata_No.1%2C_Op.13_(Faur%C3%A9%2C_Gabriel)\",\n  \"fileType\": \"LINK\",\n  \"composer\": {\n    \"name\": \"Gabriel Fauré\",\n    \"era\": \"Romantic\"\n  },\n  \"instrument\": {\n    \"name\": \"Violin\",\n    \"family\": \"String\"\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/sheet-music",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"sheet-music"
+									]
+								},
+								"description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nA successful POST request typically returns a `200 OK` or `201 Created` response code."
+							},
+							"response": []
+						},
+						{
+							"name": "Add sheet music - exsisting title",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response status code is 400\", function () {",
+											"  pm.expect(pm.response.code).to.equal(400);",
+											"});",
+											"",
+											"pm.test(\"Response time is less than 200ms\", function () {",
+											"  pm.expect(pm.response.responseTime).to.be.below(200);",
+											"});",
+											"",
+											"// Test to check for error message",
+											"pm.test(\"Error message is present\", function () {",
+											"    pm.expect(pm.response.text()).to.include('Sheet music with same title already exsists!');",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Define the request URL to retrieve a list of sheet music records\r",
+											"const requestUrl = pm.collectionVariables.get(\"base_url\") + \"/sheet-music\";\r",
+											"\r",
+											"// Send a request to get the list of records\r",
+											"pm.sendRequest(requestUrl, function (err, res) {\r",
+											"    if (err) {\r",
+											"        console.error(\"Error fetching sheet music list:\", err);\r",
+											"        return;\r",
+											"    }\r",
+											"    \r",
+											"    // Check if the response status is OK\r",
+											"    if (res.status === \"OK\") {\r",
+											"        const responseBody = res.json();\r",
+											"        // Ensure response is an array and has at least one record\r",
+											"        if (Array.isArray(responseBody) && responseBody.length > 0) {\r",
+											"            // Get the Title of the first record (you can adjust this logic)\r",
+											"            const validTitle = responseBody[0].title;\r",
+											"\r",
+											"            \r",
+											"            pm.collectionVariables.set(\"sheetMusicExsistingTitle\", validTitle);\r",
+											"            \r",
+											"            // Log the Title to the console for verification\r",
+											"            console.log(\"Valid sheet music Title:\", validTitle);\r",
+											"        } else {\r",
+											"            console.error(\"No records found in the response.\");\r",
+											"        }\r",
+											"    } else {\r",
+											"        console.error(\"Failed to fetch records. Status code:\", res.status);\r",
+											"    }\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"title\": \"{{sheetMusicExsistingTitle}}\",\n  \"fileLink\": \"https://imslp.org/wiki/Violin_Sonata_No.1%2C_Op.13_(Faur%C3%A9%2C_Gabriel)\",\n  \"fileType\": \"LINK\",\n  \"composer\": {\n    \"name\": \"Gabriel Fauré\",\n    \"era\": \"Romantic\"\n  },\n  \"instrument\": {\n    \"name\": \"Violin\",\n    \"family\": \"String\"\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/sheet-music",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"sheet-music"
+									]
+								},
+								"description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nA successful POST request typically returns a `200 OK` or `201 Created` response code."
+							},
+							"response": []
+						},
+						{
+							"name": "Add sheet music - invalid file type",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response status code is 400\", function () {",
+											"  pm.expect(pm.response.code).to.equal(400);",
+											"});",
+											"",
+											"pm.test(\"Response time is less than 200ms\", function () {",
+											"  pm.expect(pm.response.responseTime).to.be.below(200);",
+											"});",
+											"",
+											"// Test to check for error message",
+											"pm.test(\"Error message is present\", function () {",
+											"    pm.expect(pm.response.text()).to.include('Invalid file type:');",
+											"});",
+											"",
+											"",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Generate a unique name\r",
+											"const uniqueSuffix = new Date().getTime();\r",
+											"const sheetMusicTitle = `Violin Sonata No.1, Op.${uniqueSuffix}`;\r",
+											"\r",
+											"// Save it to an environment or collection variable\r",
+											"pm.collectionVariables.set('sheetMusicTitle', sheetMusicTitle);\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"title\": \"{{sheetMusicTitle}}\",\n  \"fileLink\": \"https://imslp.org/wiki/Violin_Sonata_No.1%2C_Op.13_(Faur%C3%A9%2C_Gabriel)\",\n  \"fileType\": \"xxx\",\n  \"composer\": {\n    \"name\": \"Gabriel Fauré\",\n    \"era\": \"Romantic\"\n  },\n  \"instrument\": {\n    \"name\": \"Violin\",\n    \"family\": \"String\"\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/sheet-music",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"sheet-music"
+									]
+								},
+								"description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nA successful POST request typically returns a `200 OK` or `201 Created` response code."
+							},
+							"response": []
+						},
+						{
+							"name": "Add sheet music - invalid base64 encoded data(file)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response status code is 400\", function () {",
+											"  pm.expect(pm.response.code).to.equal(400);",
+											"});",
+											"",
+											"pm.test(\"Response time is less than 200ms\", function () {",
+											"  pm.expect(pm.response.responseTime).to.be.below(200);",
+											"});",
+											"",
+											"// Test to check for error message",
+											"pm.test(\"Error message is present\", function () {",
+											"    pm.expect(pm.response.text()).to.include(\"Invalid base64 encoded data(file).\");",
+											"});",
+											"",
+											"",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Generate a unique name\r",
+											"const uniqueSuffix = new Date().getTime();\r",
+											"const sheetMusicTitle = `Violin Sonata No.1, Op.${uniqueSuffix}`;\r",
+											"\r",
+											"// Save it to an environment or collection variable\r",
+											"pm.collectionVariables.set('sheetMusicTitle', sheetMusicTitle);\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"title\": \"{{sheetMusicTitle}}\",\n  \"data\": \"savdvasdv\",\n  \"fileType\": \"Pdf\",\n  \"composer\": {\n    \"name\": \"Gabriel Fauré\",\n    \"era\": \"Romantic\"\n  },\n  \"instrument\": {\n    \"name\": \"Violin\",\n    \"family\": \"String\"\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/sheet-music",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"sheet-music"
+									]
+								},
+								"description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nA successful POST request typically returns a `200 OK` or `201 Created` response code."
+							},
+							"response": []
+						},
+						{
+							"name": "Update one sheet music - title already exsists",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response status code is 400\", function () {",
+											"  pm.expect(pm.response.code).to.equal(400);",
+											"});",
+											"",
+											"pm.test(\"Response time is less than 200ms\", function () {",
+											"  pm.expect(pm.response.responseTime).to.be.below(200);",
+											"});",
+											"",
+											"// Test to check for error message",
+											"pm.test(\"Error message is present\", function () {",
+											"    pm.expect(pm.response.text()).to.include('Sheet music with same title already exsists!');",
+											"});",
+											"",
+											"",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Define the request URL to retrieve a list of sheet music records\r",
+											"const requestUrl = pm.collectionVariables.get(\"base_url\") + \"/sheet-music\";\r",
+											"\r",
+											"// Send a request to get the list of records\r",
+											"pm.sendRequest(requestUrl, function (err, res) {\r",
+											"    if (err) {\r",
+											"        console.error(\"Error fetching sheet music list:\", err);\r",
+											"        return;\r",
+											"    }\r",
+											"    \r",
+											"    // Check if the response status is OK\r",
+											"    if (res.status === \"OK\") {\r",
+											"        const responseBody = res.json();\r",
+											"        // Ensure response is an array and has at least one record\r",
+											"        if (Array.isArray(responseBody) && responseBody.length > 0) {\r",
+											"            // Get the Title of the first record (you can adjust this logic)\r",
+											"            const validTitle = responseBody[0].title;\r",
+											"            pm.collectionVariables.set(\"sheetMusicExsistingTitle\", validTitle);\r",
+											"            // Log the Title to the console for verification\r",
+											"            console.log(\"Valid sheet music Title:\", validTitle);\r",
+											"\r",
+											"\r",
+											"            const validId = responseBody[0].id;\r",
+											"            pm.collectionVariables.set(\"sheetMusicId\", validId);\r",
+											"            // Log the ID to the console for verification\r",
+											"            console.log(\"Valid sheet music ID:\", validId);\r",
+											"        } else {\r",
+											"            console.error(\"No records found in the response.\");\r",
+											"        }\r",
+											"    } else {\r",
+											"        console.error(\"Failed to fetch records. Status code:\", res.status);\r",
+											"    }\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"title\": \"{{sheetMusicExsistingTitle}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/sheet-music/:sheetMusicId",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"sheet-music",
+										":sheetMusicId"
+									],
+									"variable": [
+										{
+											"key": "sheetMusicId",
+											"value": "{{sheetMusicId}}"
+										}
+									]
+								},
+								"description": "This is a PUT request and it is used to overwrite an existing piece of data. For instance, after you create an entity with a POST request, you may want to modify that later. You can do that using a PUT request. You typically identify the entity being updated by including an identifier in the URL (eg. `id=1`).\n\nA successful PUT request typically returns a `200 OK`, `201 Created`, or `204 No Content` response code."
+							},
+							"response": []
+						},
+						{
+							"name": "Delete sheet music - id not found",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response status code is 404\", function () {",
+											"  pm.expect(pm.response.code).to.equal(404);",
+											"});",
+											"",
+											"pm.test(\"Response time is less than 200ms\", function () {",
+											"  pm.expect(pm.response.responseTime).to.be.below(200);",
+											"});",
+											"",
+											"// Test to check for error message",
+											"pm.test(\"Error message is present\", function () {",
+											"    pm.expect(pm.response.text()).to.include('Sheet music not found with id');",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Define the request URL to retrieve a list of sheet music records\r",
+											"const requestUrl = pm.collectionVariables.get(\"base_url\") + \"/sheet-music\";\r",
+											"\r",
+											"// Send a request to get the list of records\r",
+											"pm.sendRequest(requestUrl, function (err, res) {\r",
+											"    if (err) {\r",
+											"        console.error(\"Error fetching sheet music list:\", err);\r",
+											"        return;\r",
+											"    }\r",
+											"    \r",
+											"    // Check if the response status is OK\r",
+											"    if (res.status === \"OK\") {\r",
+											"        const responseBody = res.json();\r",
+											"        // Ensure response is an array and has at least one record\r",
+											"        if (Array.isArray(responseBody) && responseBody.length > 0) {\r",
+											"            // Get the ID of the first record (you can adjust this logic)\r",
+											"            const validId = responseBody[0].id;\r",
+											"            \r",
+											"        \r",
+											"            pm.collectionVariables.set(\"sheetMusicId\", validId);\r",
+											"            \r",
+											"            // Log the ID to the console for verification\r",
+											"            console.log(\"Valid sheet music ID:\", validId);\r",
+											"        } else {\r",
+											"            console.error(\"No records found in the response.\");\r",
+											"        }\r",
+											"    } else {\r",
+											"        console.error(\"Failed to fetch records. Status code:\", res.status);\r",
+											"    }\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/sheet-music/:sheetMusicId",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"sheet-music",
+										":sheetMusicId"
+									],
+									"variable": [
+										{
+											"key": "sheetMusicId",
+											"value": "84265"
+										}
+									]
+								},
+								"description": "This is a DELETE request, and it is used to delete data that was previously created via a POST request. You typically identify the entity being updated by including an identifier in the URL (eg. `id=1`).\n\nA successful DELETE request typically returns a `200 OK`, `202 Accepted`, or `204 No Content` response code."
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Composers - error",
+					"item": [
+						{
+							"name": "Get one composer - id not found",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response status code is 404\", function () {\r",
+											"  pm.expect(pm.response.code).to.equal(404);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response time is less than 200ms\", function () {\r",
+											"  pm.expect(pm.response.responseTime).to.be.below(200);\r",
+											"});\r",
+											"\r",
+											"// Test to check for error message\r",
+											"pm.test(\"Error message is present\", function () {\r",
+											"    pm.expect(pm.response.text()).to.include('Composer not found with id');\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/composers/:composerId",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"composers",
+										":composerId"
+									],
+									"variable": [
+										{
+											"key": "composerId",
+											"value": "226549"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add composer - empty name",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response status code is 400\", function () {",
+											"  pm.expect(pm.response.code).to.equal(400);",
+											"});",
+											"",
+											"pm.test(\"Response time is less than 200ms\", function () {",
+											"  pm.expect(pm.response.responseTime).to.be.below(200);",
+											"});",
+											"",
+											"// Test to check for error message",
+											"pm.test(\"Error message is present\", function () {",
+											"    pm.expect(pm.response.text()).to.include('Name must not be empty.');",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"\",\n    \"era\": \"Romantic\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/composers",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"composers"
+									]
+								},
+								"description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nA successful POST request typically returns a `200 OK` or `201 Created` response code."
+							},
+							"response": []
+						},
+						{
+							"name": "Add composer - exsisting name",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response status code is 400\", function () {",
+											"  pm.expect(pm.response.code).to.equal(400);",
+											"});",
+											"",
+											"pm.test(\"Response time is less than 200ms\", function () {",
+											"  pm.expect(pm.response.responseTime).to.be.below(200);",
+											"});",
+											"",
+											"// Test to check for error message",
+											"pm.test(\"Error message is present\", function () {",
+											"    pm.expect(pm.response.text()).to.include('Composer with same name already exsists!');",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Define the request URL to retrieve a list of composers records\r",
+											"const requestUrl = pm.collectionVariables.get(\"base_url\") + \"/composers\";\r",
+											"\r",
+											"// Send a request to get the list of records\r",
+											"pm.sendRequest(requestUrl, function (err, res) {\r",
+											"    if (err) {\r",
+											"        console.error(\"Error fetching composers list:\", err);\r",
+											"        return;\r",
+											"    }\r",
+											"    \r",
+											"    // Check if the response status is OK\r",
+											"    if (res.status === \"OK\") {\r",
+											"        const responseBody = res.json();\r",
+											"        // Ensure response is an array and has at least one record\r",
+											"        if (Array.isArray(responseBody) && responseBody.length > 0) {\r",
+											"            // Get the Name of the first record (you can adjust this logic)\r",
+											"            const validName = responseBody[0].name;\r",
+											"\r",
+											"            \r",
+											"            pm.collectionVariables.set(\"composerExsistingName\", validName);\r",
+											"            \r",
+											"            // Log the Name to the console for verification\r",
+											"            console.log(\"Valid composer Name:\", validName);\r",
+											"        } else {\r",
+											"            console.error(\"No records found in the response.\");\r",
+											"        }\r",
+											"    } else {\r",
+											"        console.error(\"Failed to fetch records. Status code:\", res.status);\r",
+											"    }\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"{{composerExsistingName}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/composers",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"composers"
+									]
+								},
+								"description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nA successful POST request typically returns a `200 OK` or `201 Created` response code."
+							},
+							"response": []
+						},
+						{
+							"name": "Update one composer - name already exsists",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response status code is 400\", function () {",
+											"  pm.expect(pm.response.code).to.equal(400);",
+											"});",
+											"",
+											"pm.test(\"Response time is less than 200ms\", function () {",
+											"  pm.expect(pm.response.responseTime).to.be.below(200);",
+											"});",
+											"",
+											"// Test to check for error message",
+											"pm.test(\"Error message is present\", function () {",
+											"    pm.expect(pm.response.text()).to.include('Composer with same title already exsists!');",
+											"});",
+											"",
+											"",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Define the request URL to retrieve a list of composers records\r",
+											"const requestUrl = pm.collectionVariables.get(\"base_url\") + \"/composers\";\r",
+											"\r",
+											"// Send a request to get the list of records\r",
+											"pm.sendRequest(requestUrl, function (err, res) {\r",
+											"    if (err) {\r",
+											"        console.error(\"Error fetching composers list:\", err);\r",
+											"        return;\r",
+											"    }\r",
+											"    \r",
+											"    // Check if the response status is OK\r",
+											"    if (res.status === \"OK\") {\r",
+											"        const responseBody = res.json();\r",
+											"        // Ensure response is an array and has at least one record\r",
+											"        if (Array.isArray(responseBody) && responseBody.length > 0) {\r",
+											"            // Get the ID of the first record (you can adjust this logic)\r",
+											"            const validId = responseBody[0].id;\r",
+											"            pm.collectionVariables.set(\"composerId\", validId);\r",
+											"            // Log the ID to the console for verification\r",
+											"            console.log(\"Valid composer ID:\", validId);\r",
+											"\r",
+											"            const exsistingName = responseBody[1].name;\r",
+											"            pm.collectionVariables.set(\"composerExsistingName\", exsistingName);\r",
+											"\r",
+											"        } else {\r",
+											"            console.error(\"No records found in the response.\");\r",
+											"        }\r",
+											"    } else {\r",
+											"        console.error(\"Failed to fetch records. Status code:\", res.status);\r",
+											"    }\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"name\": \"{{composerExsistingName}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/composers/:composerId",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"composers",
+										":composerId"
+									],
+									"variable": [
+										{
+											"key": "composerId",
+											"value": "{{composerId}}"
+										}
+									]
+								},
+								"description": "This is a PUT request and it is used to overwrite an existing piece of data. For instance, after you create an entity with a POST request, you may want to modify that later. You can do that using a PUT request. You typically identify the entity being updated by including an identifier in the URL (eg. `id=1`).\n\nA successful PUT request typically returns a `200 OK`, `201 Created`, or `204 No Content` response code."
+							},
+							"response": []
+						},
+						{
+							"name": "Delete sheet music - id not found",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response status code is 404\", function () {",
+											"  pm.expect(pm.response.code).to.equal(404);",
+											"});",
+											"",
+											"pm.test(\"Response time is less than 200ms\", function () {",
+											"  pm.expect(pm.response.responseTime).to.be.below(200);",
+											"});",
+											"",
+											"// Test to check for error message",
+											"pm.test(\"Error message is present\", function () {",
+											"    pm.expect(pm.response.text()).to.include('Composer not found with id');",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Define the request URL to retrieve a list of sheet music records\r",
+											"const requestUrl = pm.collectionVariables.get(\"base_url\") + \"/sheet-music\";\r",
+											"\r",
+											"// Send a request to get the list of records\r",
+											"pm.sendRequest(requestUrl, function (err, res) {\r",
+											"    if (err) {\r",
+											"        console.error(\"Error fetching sheet music list:\", err);\r",
+											"        return;\r",
+											"    }\r",
+											"    \r",
+											"    // Check if the response status is OK\r",
+											"    if (res.status === \"OK\") {\r",
+											"        const responseBody = res.json();\r",
+											"        // Ensure response is an array and has at least one record\r",
+											"        if (Array.isArray(responseBody) && responseBody.length > 0) {\r",
+											"            // Get the ID of the first record (you can adjust this logic)\r",
+											"            const validId = responseBody[0].id;\r",
+											"            \r",
+											"        \r",
+											"            pm.collectionVariables.set(\"sheetMusicId\", validId);\r",
+											"            \r",
+											"            // Log the ID to the console for verification\r",
+											"            console.log(\"Valid sheet music ID:\", validId);\r",
+											"        } else {\r",
+											"            console.error(\"No records found in the response.\");\r",
+											"        }\r",
+											"    } else {\r",
+											"        console.error(\"Failed to fetch records. Status code:\", res.status);\r",
+											"    }\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/composers/:composerId",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"composers",
+										":composerId"
+									],
+									"variable": [
+										{
+											"key": "composerId",
+											"value": "16524"
+										}
+									]
+								},
+								"description": "This is a DELETE request, and it is used to delete data that was previously created via a POST request. You typically identify the entity being updated by including an identifier in the URL (eg. `id=1`).\n\nA successful DELETE request typically returns a `200 OK`, `202 Accepted`, or `204 No Content` response code."
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Instruments - error",
+					"item": [
+						{
+							"name": "Get one instrument - id not found",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response status code is 404\", function () {\r",
+											"  pm.expect(pm.response.code).to.equal(404);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response time is less than 200ms\", function () {\r",
+											"  pm.expect(pm.response.responseTime).to.be.below(200);\r",
+											"});\r",
+											"\r",
+											"// Test to check for error message\r",
+											"pm.test(\"Error message is present\", function () {\r",
+											"    pm.expect(pm.response.text()).to.include('Instrument not found with id');\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/instruments/:instrumentId",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"instruments",
+										":instrumentId"
+									],
+									"variable": [
+										{
+											"key": "instrumentId",
+											"value": "1526884"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Webhooks - error",
+					"item": [
+						{
+							"name": "Get one sheet music subscription- id not found",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response status code is 404\", function () {\r",
+											"  pm.expect(pm.response.code).to.equal(404);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response time is less than 200ms\", function () {\r",
+											"  pm.expect(pm.response.responseTime).to.be.below(200);\r",
+											"});\r",
+											"\r",
+											"// Test to check for error message\r",
+											"pm.test(\"Error message is present\", function () {\r",
+											"    pm.expect(pm.response.text()).to.include('Sheet music subscription not found with id');\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/subscriptions/sheet-music/:sheetMusicSubscriptionId",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"subscriptions",
+										"sheet-music",
+										":sheetMusicSubscriptionId"
+									],
+									"variable": [
+										{
+											"key": "sheetMusicSubscriptionId",
+											"value": "165355"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add sheet music subscription - empty callbackUrl",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response status code is 400\", function () {",
+											"  pm.expect(pm.response.code).to.equal(400);",
+											"});",
+											"",
+											"pm.test(\"Response time is less than 200ms\", function () {",
+											"  pm.expect(pm.response.responseTime).to.be.below(200);",
+											"});",
+											"",
+											"// Test to check for error message",
+											"pm.test(\"Error message is present\", function () {",
+											"    pm.expect(pm.response.text()).to.include('CallbackUrl must not be empty.');",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Define the request URL to retrieve a list of instruments records\r",
+											"const requestUrl = pm.collectionVariables.get(\"base_url\") + \"/instruments\";\r",
+											"let i = pm.collectionVariables.get('i');\r",
+											"// Send a request to get the list of records\r",
+											"pm.sendRequest(requestUrl, function (err, res) {\r",
+											"    if (err) {\r",
+											"        console.error(\"Error fetching instruments list:\", err);\r",
+											"        return;\r",
+											"    }\r",
+											"    \r",
+											"    // Check if the response status is OK\r",
+											"    if (res.status === \"OK\") {\r",
+											"        const responseBody = res.json();\r",
+											"        // Ensure response is an array and has at least one record\r",
+											"        if (Array.isArray(responseBody) && responseBody.length > 0) {\r",
+											"            // Get the ID of the first record (you can adjust this logic)\r",
+											"            if (i >= responseBody.length) {\r",
+											"                i=1;\r",
+											"            }\r",
+											"            const validId = responseBody[i].id;\r",
+											"            i++;\r",
+											"            pm.collectionVariables.set('i', i);\r",
+											"        \r",
+											"            pm.collectionVariables.set(\"instrumentId\", validId);\r",
+											"            \r",
+											"            // Log the ID to the console for verification\r",
+											"            console.log(\"Valid instruments ID:\", validId);\r",
+											"        } else {\r",
+											"            console.error(\"No records found in the response.\");\r",
+											"        }\r",
+											"    } else {\r",
+											"        console.error(\"Failed to fetch records. Status code:\", res.status);\r",
+											"    }\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"callbackUrl\": \"\",\n  \"instrumentId\": {{instrumentId}}\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/subscriptions/sheet-music",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"subscriptions",
+										"sheet-music"
+									]
+								},
+								"description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nA successful POST request typically returns a `200 OK` or `201 Created` response code."
+							},
+							"response": []
+						},
+						{
+							"name": "Add sheet music subscription - invalid callbackUrl",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response status code is 400\", function () {",
+											"  pm.expect(pm.response.code).to.equal(400);",
+											"});",
+											"",
+											"pm.test(\"Response time is less than 200ms\", function () {",
+											"  pm.expect(pm.response.responseTime).to.be.below(200);",
+											"});",
+											"",
+											"// Test to check for error message",
+											"pm.test(\"Error message is present\", function () {",
+											"    pm.expect(pm.response.text()).to.include('CallbackUrl must be a valid HTTP/HTTPS URL.');",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Define the request URL to retrieve a list of instruments records\r",
+											"const requestUrl = pm.collectionVariables.get(\"base_url\") + \"/instruments\";\r",
+											"let i = pm.collectionVariables.get('i');\r",
+											"// Send a request to get the list of records\r",
+											"pm.sendRequest(requestUrl, function (err, res) {\r",
+											"    if (err) {\r",
+											"        console.error(\"Error fetching instruments list:\", err);\r",
+											"        return;\r",
+											"    }\r",
+											"    \r",
+											"    // Check if the response status is OK\r",
+											"    if (res.status === \"OK\") {\r",
+											"        const responseBody = res.json();\r",
+											"        // Ensure response is an array and has at least one record\r",
+											"        if (Array.isArray(responseBody) && responseBody.length > 0) {\r",
+											"            // Get the ID of the first record (you can adjust this logic)\r",
+											"            if (i >= responseBody.length) {\r",
+											"                i=1;\r",
+											"            }\r",
+											"            const validId = responseBody[i].id;\r",
+											"            i++;\r",
+											"            pm.collectionVariables.set('i', i);\r",
+											"        \r",
+											"            pm.collectionVariables.set(\"instrumentId\", validId);\r",
+											"            \r",
+											"            // Log the ID to the console for verification\r",
+											"            console.log(\"Valid instruments ID:\", validId);\r",
+											"        } else {\r",
+											"            console.error(\"No records found in the response.\");\r",
+											"        }\r",
+											"    } else {\r",
+											"        console.error(\"Failed to fetch records. Status code:\", res.status);\r",
+											"    }\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"callbackUrl\": \"httk-test.com/d543969c8ed26f10c1174be773ef8469\",\n  \"instrumentId\": {{instrumentId}}\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/subscriptions/sheet-music",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"subscriptions",
+										"sheet-music"
+									]
+								},
+								"description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nA successful POST request typically returns a `200 OK` or `201 Created` response code."
+							},
+							"response": []
+						},
+						{
+							"name": "Add sheet music subscription - invalid instrumentId",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response status code is 404\", function () {",
+											"  pm.expect(pm.response.code).to.equal(404);",
+											"});",
+											"",
+											"pm.test(\"Response time is less than 200ms\", function () {",
+											"  pm.expect(pm.response.responseTime).to.be.below(200);",
+											"});",
+											"",
+											"// Test to check for error message",
+											"pm.test(\"Error message is present\", function () {",
+											"    pm.expect(pm.response.text()).to.include('Instrument not found with id');",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Define the request URL to retrieve a list of instruments records\r",
+											"const requestUrl = pm.collectionVariables.get(\"base_url\") + \"/instruments\";\r",
+											"let i = pm.collectionVariables.get('i');\r",
+											"// Send a request to get the list of records\r",
+											"pm.sendRequest(requestUrl, function (err, res) {\r",
+											"    if (err) {\r",
+											"        console.error(\"Error fetching instruments list:\", err);\r",
+											"        return;\r",
+											"    }\r",
+											"    \r",
+											"    // Check if the response status is OK\r",
+											"    if (res.status === \"OK\") {\r",
+											"        const responseBody = res.json();\r",
+											"        // Ensure response is an array and has at least one record\r",
+											"        if (Array.isArray(responseBody) && responseBody.length > 0) {\r",
+											"            // Get the ID of the first record (you can adjust this logic)\r",
+											"            if (i >= responseBody.length) {\r",
+											"                i=1;\r",
+											"            }\r",
+											"            const validId = responseBody[i].id;\r",
+											"            i++;\r",
+											"            pm.collectionVariables.set('i', i);\r",
+											"        \r",
+											"            pm.collectionVariables.set(\"instrumentId\", validId);\r",
+											"            \r",
+											"            // Log the ID to the console for verification\r",
+											"            console.log(\"Valid instruments ID:\", validId);\r",
+											"        } else {\r",
+											"            console.error(\"No records found in the response.\");\r",
+											"        }\r",
+											"    } else {\r",
+											"        console.error(\"Failed to fetch records. Status code:\", res.status);\r",
+											"    }\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"callbackUrl\": \"https://webhook-test.com/d543969c8ed26f10c1174be773ef8469\",\n  \"instrumentId\": 6549\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/subscriptions/sheet-music",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"subscriptions",
+										"sheet-music"
+									]
+								},
+								"description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nA successful POST request typically returns a `200 OK` or `201 Created` response code."
+							},
+							"response": []
+						},
+						{
+							"name": "Add sheet music subscription - exsisiting subscription",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response status code is 400\", function () {",
+											"  pm.expect(pm.response.code).to.equal(400);",
+											"});",
+											"",
+											"pm.test(\"Response time is less than 200ms\", function () {",
+											"  pm.expect(pm.response.responseTime).to.be.below(200);",
+											"});",
+											"",
+											"// Test to check for error message",
+											"pm.test(\"Error message is present\", function () {",
+											"    pm.expect(pm.response.text()).to.include('Subscription with the same callbackUrl and instrumentId already exists!');",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Define the request URL to retrieve a list of subscriptions records\r",
+											"const requestUrl = pm.collectionVariables.get(\"base_url\") + \"/subscriptions/sheet-music\";\r",
+											"\r",
+											"pm.sendRequest(requestUrl, function (err, res) {\r",
+											"    if (err) {\r",
+											"        console.error(\"Error fetching subscriptions list:\", err);\r",
+											"        return;\r",
+											"    }\r",
+											"    \r",
+											"    // Check if the response status is OK\r",
+											"    if (res.status === \"OK\") {\r",
+											"        const responseBody = res.json();\r",
+											"        // Ensure response is an array and has at least one record\r",
+											"        if (Array.isArray(responseBody) && responseBody.length > 0) {\r",
+											"      \r",
+											"            const validId = responseBody[0].instrumentId;\r",
+											"            pm.collectionVariables.set(\"instrumentId\", validId);\r",
+											"            // Log the ID to the console for verification\r",
+											"            console.log(\"Valid instruments ID:\", validId);\r",
+											"\r",
+											"            const validCallbackUrl = responseBody[0].callbackUrl;\r",
+											"            pm.collectionVariables.set(\"exsistingCallbackUrl\", validCallbackUrl);\r",
+											"            // Log the ID to the console for verification\r",
+											"            console.log(\"Valid instruments ID:\", validCallbackUrl);\r",
+											"\r",
+											"        } else {\r",
+											"            console.error(\"No records found in the response.\");\r",
+											"        }\r",
+											"    } else {\r",
+											"        console.error(\"Failed to fetch records. Status code:\", res.status);\r",
+											"    }\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"callbackUrl\": \"{{exsistingCallbackUrl}}\",\n  \"instrumentId\": {{instrumentId}}\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/subscriptions/sheet-music",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"subscriptions",
+										"sheet-music"
+									]
+								},
+								"description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nA successful POST request typically returns a `200 OK` or `201 Created` response code."
+							},
+							"response": []
+						},
+						{
+							"name": "Delete sheet music - id not found",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response status code is 404\", function () {",
+											"  pm.expect(pm.response.code).to.equal(404);",
+											"});",
+											"",
+											"pm.test(\"Response time is less than 200ms\", function () {",
+											"  pm.expect(pm.response.responseTime).to.be.below(200);",
+											"});",
+											"",
+											"// Test to check for error message",
+											"pm.test(\"Error message is present\", function () {",
+											"    pm.expect(pm.response.text()).to.include('Sheet music subscription not found with id');",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Define the request URL to retrieve a list of sheet music records\r",
+											"const requestUrl = pm.collectionVariables.get(\"base_url\") + \"/sheet-music\";\r",
+											"\r",
+											"// Send a request to get the list of records\r",
+											"pm.sendRequest(requestUrl, function (err, res) {\r",
+											"    if (err) {\r",
+											"        console.error(\"Error fetching sheet music list:\", err);\r",
+											"        return;\r",
+											"    }\r",
+											"    \r",
+											"    // Check if the response status is OK\r",
+											"    if (res.status === \"OK\") {\r",
+											"        const responseBody = res.json();\r",
+											"        // Ensure response is an array and has at least one record\r",
+											"        if (Array.isArray(responseBody) && responseBody.length > 0) {\r",
+											"            // Get the ID of the first record (you can adjust this logic)\r",
+											"            const validId = responseBody[0].id;\r",
+											"            \r",
+											"        \r",
+											"            pm.collectionVariables.set(\"sheetMusicId\", validId);\r",
+											"            \r",
+											"            // Log the ID to the console for verification\r",
+											"            console.log(\"Valid sheet music ID:\", validId);\r",
+											"        } else {\r",
+											"            console.error(\"No records found in the response.\");\r",
+											"        }\r",
+											"    } else {\r",
+											"        console.error(\"Failed to fetch records. Status code:\", res.status);\r",
+											"    }\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/subscriptions/sheet-music/:sheetMusicSubscriptionId",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"subscriptions",
+										"sheet-music",
+										":sheetMusicSubscriptionId"
+									],
+									"variable": [
+										{
+											"key": "sheetMusicSubscriptionId",
+											"value": "16513"
+										}
+									]
+								},
+								"description": "This is a DELETE request, and it is used to delete data that was previously created via a POST request. You typically identify the entity being updated by including an identifier in the URL (eg. `id=1`).\n\nA successful DELETE request typically returns a `200 OK`, `202 Accepted`, or `204 No Content` response code."
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "sheetMusicId",
+			"value": "2"
+		},
+		{
+			"key": "base_url",
+			"value": "http://34.88.72.104/api/v1"
+		},
+		{
+			"key": "composerId",
+			"value": "55",
+			"type": "string"
+		},
+		{
+			"key": "sheetMusicSubscriptionId",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "instrumentId",
+			"value": "2",
+			"type": "string"
+		},
+		{
+			"key": "email",
+			"value": ""
+		},
+		{
+			"key": "authToken",
+			"value": ""
+		},
+		{
+			"key": "sheetMusicTitle",
+			"value": ""
+		},
+		{
+			"key": "composersId",
+			"value": ""
+		},
+		{
+			"key": "composerName",
+			"value": ""
+		},
+		{
+			"key": "instrumentsId",
+			"value": ""
+		},
+		{
+			"key": "sheetMusicSubscriptionsId",
+			"value": ""
+		},
+		{
+			"key": "callbackUrl",
+			"value": ""
+		},
+		{
+			"key": "i",
+			"value": ""
+		},
+		{
+			"key": "sheetMusicExsistingTitle",
+			"value": ""
+		},
+		{
+			"key": "composerExsistingName",
+			"value": ""
+		},
+		{
+			"key": "exsistingCallbackUrl",
+			"value": ""
+		}
+	]
+}
