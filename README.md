@@ -18,7 +18,6 @@ The Sheet Music Library API is a RESTful web service built with Spring Boot. It 
 - **Webhook Notifications**: Subscribe to notifications for new sheet music written by specific composers.
 
 ## Getting Started
-
 ### Prerequisites
 
 - Java 17 or later
@@ -121,3 +120,7 @@ newman run postman-tests/Sheet_Music_Library.postman_collection.json
 
 ### License
 This project is licensed under the MIT License
+
+### Contact
+Vanja Maric
+email: maricvanj@gmail.com
